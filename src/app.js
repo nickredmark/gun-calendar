@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { hot } from "react-hot-loader/root";
 import { GunCalendar } from "./components/GunCalendar";
+import uuid from "uuid/v1";
 
 require("gun/lib/open");
 
@@ -23,6 +24,16 @@ const App = () => {
         >
           <input ref={newId} placeholder="(New) calendar ID e.g. nicksevents" />
         </form>
+        or
+        <button
+          onClick={e =>
+            (window.location.href = `${
+              window.location.origin
+            }?calendar=${uuid()}`)
+          }
+        >
+          Create new calendar with random ID
+        </button>
       </div>
     );
   }

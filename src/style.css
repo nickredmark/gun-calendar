@@ -8,7 +8,7 @@ html {
   padding: 0;
   font-family: sans-serif;
   font-size: 12px;
-  background-color: white;
+  background-color: #eee;
 }
 
 body,
@@ -22,6 +22,7 @@ html,
 .new-calendar {
   width: 20rem;
   margin: auto;
+  text-align: center;
 }
 
 .calendar {
@@ -30,6 +31,7 @@ html,
   width: 100%;
   flex: 1 1 auto;
   overflow-y: hidden;
+  background-color: white;
 }
 
 .calendar-title {
@@ -117,17 +119,13 @@ html,
   padding-left: 1rem;
 }
 
-button {
+.calendar-nav button {
   width: 2rem;
   height: 2rem;
   border: 1px solid black;
   border-radius: 0.25rem;
   margin: 0.5rem;
   cursor: pointer;
-}
-
-.new-event {
-  margin-bottom: 0.125rem;
 }
 
 .event,
@@ -139,7 +137,7 @@ button {
   flex: 1 1 auto;
   height: 100%;
 }
-input {
+.hour input {
   width: 100%;
   background-color: transparent;
   border: none;
