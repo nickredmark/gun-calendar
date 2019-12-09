@@ -1,34 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import moment from "moment";
-
-const getSet = (data, id, key) => {
-  if (!id) {
-    throw new Error("No id defined");
-  }
-  const entity = data[id];
-  if (!entity || !entity[key]) {
-    return [];
-  }
-  const set = data[entity[key]["#"]];
-  if (!set) {
-    return [];
-  }
-  const arr = Object.keys(set)
-    .filter(key => key !== "_")
-    .map(key => set[key])
-    .filter(Boolean)
-    .map(ref => data[ref["#"]])
-    .filter(Boolean);
-  return arr;
-};
+import { getId } from "nicks-gun-utils";
 
 const repeat = n => Array.apply(null, Array(n));
 
 export const Calendar = ({
   id,
-  getId,
-  data,
+  calendar,
   onCreateEvent,
   onSetCalendarTitle,
   onUpdateEvent
@@ -37,8 +16,6 @@ export const Calendar = ({
   const [newCalendarTitle, setNewCalendarTitle] = useState("");
   const [week, setWeek] = useState(moment().startOf("week"));
 
-  const calendar = data[id];
-
   return (
     <DragDropContext
       onDragEnd={({ source, destination, draggableId }) => {
@@ -46,9 +23,7 @@ export const Calendar = ({
           return;
         }
 
-        onUpdateEvent(draggableId, {
-          start: Number(destination.droppableId)
-        });
+        onUpdateEvent(draggableId, "start", Number(destination.droppableId));
       }}
     >
       <div className="calendar">
@@ -61,6 +36,7 @@ export const Calendar = ({
             }}
           >
             <input
+              autoFocus
               value={newCalendarTitle}
               onChange={e => setNewCalendarTitle(e.target.value)}
               placeholder="calendar title"
@@ -122,11 +98,9 @@ export const Calendar = ({
                 return (
                   <Day
                     key={day.valueOf()}
-                    getId={getId}
-                    calendarId={id}
                     index={i}
                     day={day}
-                    data={data}
+                    calendar={calendar}
                     onCreateEvent={onCreateEvent}
                     onUpdateEvent={onUpdateEvent}
                   />
@@ -140,14 +114,7 @@ export const Calendar = ({
   );
 };
 
-const Day = ({
-  getId,
-  calendarId,
-  day,
-  data,
-  onCreateEvent,
-  onUpdateEvent
-}) => {
+const Day = ({ day, calendar, onCreateEvent, onUpdateEvent }) => {
   return (
     <div className="day">
       {repeat(24).map((_, i) => {
@@ -155,10 +122,8 @@ const Day = ({
         return (
           <Hour
             key={hour.valueOf()}
-            calendarId={calendarId}
             hour={hour}
-            data={data}
-            getId={getId}
+            calendar={calendar}
             index={i}
             onCreateEvent={onCreateEvent}
             onUpdateEvent={onUpdateEvent}
@@ -169,23 +134,14 @@ const Day = ({
   );
 };
 
-const Hour = ({
-  getId,
-  calendarId,
-  hour,
-  data,
-  onCreateEvent,
-  onUpdateEvent
-}) => {
+const Hour = ({ hour, calendar, onCreateEvent, onUpdateEvent }) => {
+  const id = getId(hour);
   const [addingNewEvent, setAddingNewEvent] = useState(false);
   const [newEventTitle, setNewEventTitle] = useState("");
-  const events = getSet(data, calendarId, "events")
-    .filter(
-      e =>
-        hour <= moment(e.start) && moment(e.start) < moment(hour).add(1, "hour")
-    )
-    .sort((a, b) => a.start - b.start);
-
+  const events = calendar.events.filter(
+    e =>
+      hour <= moment(e.start) && moment(e.start) < moment(hour).add(1, "hour")
+  );
   return (
     <div
       className="hour"
@@ -227,17 +183,13 @@ const Hour = ({
             className="events"
             {...provided.droppableProps}
           >
-            {events.map((event, i) => {
-              const id = getId(event);
-              return (
-                <Event
-                  key={id}
-                  id={id}
-                  onUpdateEvent={onUpdateEvent}
-                  data={data}
-                />
-              );
-            })}
+            {events.map((event, i) => (
+              <Event
+                key={getId(event)}
+                event={event}
+                onUpdateEvent={onUpdateEvent}
+              />
+            ))}
             {provided.placeholder}
           </div>
         )}
@@ -249,8 +201,8 @@ const Hour = ({
   );
 };
 
-const Event = ({ index, id, data, onUpdateEvent }) => {
-  const event = data[id];
+const Event = ({ index, event, onUpdateEvent }) => {
+  const id = getId(event);
   const [editing, setEditing] = useState();
   const [eventTitle, setEventTitle] = useState(event.title);
   return (
@@ -271,7 +223,7 @@ const Event = ({ index, id, data, onUpdateEvent }) => {
             <form
               onSubmit={e => {
                 e.preventDefault();
-                onUpdateEvent(id, { title: eventTitle });
+                onUpdateEvent(id, "title", eventTitle);
                 setEditing(false);
               }}
             >
