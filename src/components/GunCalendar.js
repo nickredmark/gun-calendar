@@ -17,10 +17,7 @@ export const GunCalendar = ({ id, priv, epriv }) => {
 
   useEffect(() => {
     const gun = Gun({
-      peers: [
-        "https://gunjs.herokuapp.com/gun",
-        "https://nicks-gun-server.herokuapp.com/gun"
-      ]
+		peers: ["https://gunjs.herokuapp.com/gun", "http://nmr.io:8765/gun"],
     });
     gun.get(id).on(onData);
     gun
