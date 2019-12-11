@@ -17,7 +17,7 @@ export const GunCalendar = ({ id, priv, epriv }) => {
 
   useEffect(() => {
     const gun = Gun({
-		peers: ["https://gunjs.herokuapp.com/gun", "http://nmr.io:8765/gun"],
+      peers: ["https://gunjs.herokuapp.com/gun", "http://nmr.io:8765/gun"]
     });
     gun.get(id).on(onData);
     gun
@@ -47,7 +47,9 @@ export const GunCalendar = ({ id, priv, epriv }) => {
         put(
           [eventId, "start", start],
           [eventId, "title", title],
-          [`${id}.events`, key, { "#": eventId }]
+          [`${id}.events`, key, { "#": eventId }],
+          [id, "updated", +new Date()],
+          [id, "lastUpdate", title]
         );
       }}
       onSetCalendarTitle={title => put([id, "title", title])}
